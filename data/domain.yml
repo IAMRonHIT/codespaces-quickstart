@@ -1,0 +1,673 @@
+version: "3.1"
+
+intents: 
+  - greet
+  - goodbye
+  - prior_authorization_submission
+  - update_patient_info
+  - correction
+  - request_eligibility_check
+  - request_appointment_scheduling
+  - request_status_update
+  - inform
+  - affirm
+  - deny
+  - provide_patient_details
+  - provide_provider_details
+  - provide_service_details
+  - request_service_info
+  - request_benefits_summary
+  - check_coverage
+  - request_prior_auth_status
+  - submit_claim
+  - request_claim_status
+  - ask_for_help
+  - clarify_service_codes
+  - ask_for_documentation
+  - request_claim_correction
+  - appeal_denial
+  - request_peer_review
+  - handle_grievance
+  - follow_up_on_grievance
+  - request_appeal_status
+  - request_peer_review_status
+  - request_fair_hearing
+  - escalate_case
+  - reset_information
+  - cancel_request
+  - ask_about_compliance
+  - ask_about_timeline
+  - request_billing_information
+  - request_patient_history
+  - update_contact_information
+  - request_insurance_coverage
+  - validate_patient_information
+  - request_document_upload
+  - request_medical_records
+  - provide_insurance_information
+  - provide_contact_information
+  - inquire_about_copay
+  - request_second_opinion
+  - schedule_surgery
+  - confirm_appointment
+  - cancel_appointment
+  - inquire_about_referral
+  - file_complaint
+  - request_claim_adjustment
+  - ask_about_claim_denial_reason
+  - provide_feedback
+  - report_issue
+  - verify_service_authorization
+  - initiate_patient_transfer
+  - ask_about_network_status
+  - request_medication_coverage
+  - request_medication_refill
+  - ask_about_out_of_pocket_max
+  - request_deductible_information
+  - submit_diagnostic_test_request
+  - inquire_about_test_results
+  - request_lab_test_coverage
+  - ask_about_wait_time
+  - inquire_about_policy_exclusions
+  - request_medical_procedure_coverage
+  - provide_medical_history
+  - submit_referral_request
+  - follow_up_on_referral
+  - ask_about_treatment_options
+  - ask_about_side_effects
+  - request_prescription_details
+  - submit_medical_report
+  - request_urgent_care_coverage
+  - ask_about_payment_plans
+  - inquire_about_lifetime_limits
+  - provide_update_on_service_request
+  - report_missing_info
+  - ask_about_payer_requirements
+  - request_detailed_billing
+  - request_tax_information
+  - inquire_about_preexisting_conditions_coverage
+  - provide_medication_allergies
+  - request_physician_verification
+  - ask_for_clinical_guidelines
+  - inquire_about_service_codes
+  - request_specialist_availability
+  - request_hospital_network_info
+  - request_telehealth_availability
+  - request_emergency_room_coverage
+  - ask_about_post_procedure_recovery
+  - request_home_healthcare_coverage
+  - inquire_about_inpatient_facility_options
+  - request_case_management_services
+  - request_translation_services
+  - request_interpreter
+  - ask_about_service_approvals
+  - request_medical_device_coverage
+  - request_inpatient_authorization
+  - ask_about_discharge_planning
+  - request_surgical_preparation_info
+  - request_patient_counseling_services
+  - inquire_about_hospice_coverage
+  - ask_for_preventive_care_options
+  - inquire_about_health_screenings
+  - request_wellness_programs_info
+  - inquire_about_nutrition_counseling
+  - request_physical_therapy_coverage
+  - request_maternity_coverage
+  - inquire_about_newborn_care
+  - ask_about_immunization_coverage
+  - request_hearing_aid_coverage
+  - request_vision_care_coverage
+  - request_dental_coverage
+  - request_mental_health_care_coverage
+
+entities:
+  - first_name
+  - last_name
+  - date_of_birth
+  - ssn_last_four
+  - provider_name
+  - provider_npi
+  - provider_tin
+  - phone_number
+  - fax_number
+  - facility_name
+  - facility_npi
+  - facility_tin
+  - servicing_address
+  - billing_address
+  - cpt_code
+  - icd_10
+  - service_type
+  - units
+  - date_from
+  - date_to
+  - field_to_update
+  - new_value
+  - field_to_correct
+  - corrected_value
+  - eligibility_status
+  - authorization_number
+  - request_id
+  - payer_name
+  - insurance_policy_number
+  - insurance_group_number
+  - policy_exclusion
+  - deductible_amount
+  - deductible_met
+  - out_of_pocket_max
+  - out_of_pocket_met
+  - copayment_amount
+  - procedure_code
+  - procedure_description
+  - diagnosis_code
+  - diagnosis_description
+  - primary_diagnosis
+  - patient_id
+  - provider_id
+  - insurance_provider_id
+  - service_request_id
+  - claim_number
+  - claim_status
+  - appeal_id
+  - reconsideration_id
+  - grievance_id
+  - referral_id
+  - prior_authorization_id
+  - lab_test_id
+  - medication_name
+  - medication_dosage
+  - pharmacy_name
+  - pharmacy_id
+  - patient_history
+  - specialist_name
+  - physician_name
+  - attending_physician
+  - hospital_name
+  - medical_record_number
+  - appointment_date
+  - appointment_time
+  - treatment_plan
+  - discharge_date
+  - payer_requirements
+  - health_plan_id
+  - case_manager
+  - interpreter_language
+  - coverage_type
+  - plan_type
+  - payer_contact
+  - claim_type
+  - service_date
+  - service_thru
+  - authorization_expiration_date
+  - guideline_reference
+  - next_steps
+  - service_priority
+  - preauthorization_required
+  - reconsideration_reason
+  - denial_reason
+  - claim_denial_reason
+  - reimbursement_amount
+  - eligibility_inquiry_id
+  - claim_adjustment_code
+  - appeal_status
+  - reconsideration_status
+  - grievance_status
+  - medical_authorization_status
+  - discharge_instructions
+  - pharmacy_location
+  - medication_refill_status
+  - test_results_status
+  - lab_order_id
+  - radiology_order_id
+  - specialist_referral_status
+  - physician_referral_status
+  - care_manager_id
+  - health_literacy_level
+  - medication_list_id
+  - drug_allergies
+  - care_plan_id
+  - clinical_notes
+  - authorization_status
+  - documentation_requirements
+  - prescription_id
+  - prescription_status
+  - medication_start_date
+  - medication_end_date
+  - appeal_rights_information
+
+slots:
+  first_name:
+    type: text
+  last_name:
+    type: text
+  date_of_birth:
+    type: text
+  ssn_last_four:
+    type: text
+  provider_name:
+    type: text
+  provider_npi:
+    type: text
+  provider_tin:
+    type: text
+  phone_number:
+    type: text
+  fax_number:
+    type: text
+  facility_name:
+    type: text
+  facility_npi:
+    type: text
+  facility_tin:
+    type: text
+  servicing_address:
+    type: text
+  billing_address:
+    type: text
+  cpt_code:
+    type: text
+  icd_10:
+    type: text
+  service_type:
+    type: text
+  units:
+    type: float
+  date_from:
+    type: text
+  date_to:
+    type: text
+  eligibility_status:
+    type: bool
+  authorization_number:
+    type: text
+  request_id:
+    type: text
+  deductible_met:
+    type: bool
+  copayment_amount:
+    type: float
+  out_of_pocket_met:
+    type: bool
+  primary_diagnosis:
+    type: text
+  claim_number:
+    type: text
+  claim_status:
+    type: text
+  medication_name:
+    type: text
+  appeal_status:
+    type: text
+  preauthorization_required:
+    type: bool
+  authorization_status:
+    type: text
+  service_priority:
+    type: text
+  provider_id:
+    type: text
+  insurance_provider_id:
+    type: text
+  service_request_id:
+    type: text
+  claim_number:
+    type: text
+  claim_status:
+    type: categorical
+    values:
+      - submitted
+      - pending
+      - approved
+      - denied
+      - appealed
+  appeal_id:
+    type: text
+  reconsideration_id:
+    type: text
+  grievance_id:
+    type: text
+  referral_id:
+    type: text
+  prior_authorization_id:
+    type: text
+  lab_test_id:
+    type: text
+  medication_name:
+    type: text
+  medication_dosage:
+    type: text
+  pharmacy_name:
+    type: text
+  pharmacy_id:
+    type: text
+  patient_history:
+    type: text
+  specialist_name:
+    type: text
+  physician_name:
+    type: text
+  attending_physician:
+    type: text
+  hospital_name:
+    type: text
+  medical_record_number:
+    type: text
+  appointment_date:
+    type: text
+  appointment_time:
+    type: text
+  treatment_plan:
+    type: text
+  discharge_date:
+    type: text
+  payer_requirements:
+    type: text
+  health_plan_id:
+    type: text
+  case_manager:
+    type: text
+  interpreter_language:
+    type: text
+  coverage_type:
+    type: categorical
+    values:
+      - individual
+      - family
+      - employer
+  plan_type:
+    type: categorical
+    values:
+      - hmo
+      - ppo
+      - epo
+      - pos
+  payer_contact:
+    type: text
+  claim_type:
+    type: categorical
+    values:
+      - inpatient
+      - outpatient
+      - pharmacy
+      - emergency
+      - dme
+  service_date:
+    type: text
+  service_thru:
+    type: text
+  authorization_expiration_date:
+    type: text
+  guideline_reference:
+    type: text
+  next_steps:
+    type: text
+  service_priority:
+    type: categorical
+    values:
+      - routine
+      - urgent
+  preauthorization_required:
+    type: categorical
+    values:
+      - yes
+      - no
+  reconsideration_reason:
+    type: text
+  denial_reason:
+    type: text
+  claim_denial_reason:
+    type: text
+  reimbursement_amount:
+    type: float
+  eligibility_inquiry_id:
+    type: text
+  claim_adjustment_code:
+    type: text
+  appeal_status:
+    type: categorical
+    values:
+      - pending
+      - approved
+      - denied
+  reconsideration_status:
+    type: categorical
+    values:
+      - pending
+      - approved
+      - denied
+  grievance_status:
+    type: categorical
+    values:
+      - pending
+      - resolved
+  medical_authorization_status:
+    type: categorical
+    values:
+      - pending
+      - approved
+      - denied
+  discharge_instructions:
+    type: text
+  pharmacy_location:
+    type: text
+  medication_refill_status:
+    type: categorical
+    values:
+      - pending
+      - refilled
+  test_results_status:
+    type: categorical
+    values:
+      - pending
+      - completed
+  lab_order_id:
+    type: text
+  radiology_order_id:
+    type: text
+  specialist_referral_status:
+    type: categorical
+    values:
+      - pending
+      - referred
+  physician_referral_status:
+    type: categorical
+    values:
+      - pending
+      - referred
+  care_manager_id:
+    type: text
+
+actions:
+  - action_prior_auth_submit
+  - action_check_eligibility
+  - action_update_patient_info
+  - action_reset_information
+  - action_request_status_update
+  - action_submit_claim
+  - action_check_claim_status
+  - action_correct_information
+  - action_process_appeal
+  - action_escalate_case
+  - action_schedule_appointment
+  - action_cancel_request
+  - action_submit_diagnostic_test_request
+  - action_request_medical_records
+  - action_validate_patient_information
+
+  health_literacy_level:
+    type: text
+  medication_list_id:
+    type: text
+  drug_allergies:
+    type: text
+  care_plan_id:
+    type: text
+  clinical_notes:
+    type: text
+  authorization_status:
+    type: categorical
+    values:
+      - pending
+      - approved
+      - denied
+  documentation_requirements:
+    type: text
+  prescription_id:
+    type: text
+  prescription_status:
+    type: categorical
+    values:
+      - active
+      - expired
+      - refilled
+  medication_start_date:
+    type: text
+  medication_end_date:
+    type: text
+  appeal_rights_information:
+    type: text
+
+responses:
+  utter_greet:
+    - text: "Hello! How can I assist you today?"
+  utter_goodbye:
+    - text: "Goodbye! If you need more assistance, feel free to reach out."
+  utter_ask_for_details:
+    - text: "Can you please provide more details regarding your request?"
+  utter_ask_for_authorization_number:
+    - text: "Please provide the authorization number."
+  utter_request_service_info:
+    - text: "What is the CPT code and ICD-10 code for the service you are requesting?"
+  utter_check_eligibility:
+    - text: "I am checking eligibility for {{first_name}} {{last_name}}'s procedure."
+  utter_provide_authorization_status:
+    - text: "The authorization status for request ID {{request_id}} is {{authorization_status}}."
+  utter_ask_for_dob:
+    - text: "Please provide the patient's date of birth."
+  utter_ask_for_provider_info:
+    - text: "Can you provide the name and NPI of the provider?"
+  utter_confirm_eligibility:
+    - text: "Eligibility for {{first_name}} {{last_name}} has been confirmed. Coverage is active."
+  utter_request_additional_documents:
+    - text: "Additional documents are required for this authorization. Please provide the necessary documentation."
+  utter_submit_authorization_success:
+    - text: "The prior authorization request for {{service_type}} has been successfully submitted."
+  utter_submit_authorization_failure:
+    - text: "There was an issue submitting the prior authorization request. Please try again or contact support."
+  utter_provide_billing_info:
+    - text: "The billing details for this service are as follows: Copayment - {{copayment_amount}}, Deductible - {{deductible_amount}}, Coinsurance - {{coinsurance_amount}}."
+  utter_claim_status:
+    - text: "The status of claim number {{claim_number}} is {{claim_status}}."
+  utter_appeal_status:
+    - text: "The appeal status for appeal ID {{appeal_id}} is {{appeal_status}}."
+  utter_grievance_status:
+    - text: "The grievance status for grievance ID {{grievance_id}} is {{grievance_status}}."
+  utter_initiate_peer_review:
+    - text: "A peer review has been initiated for service request ID {{service_request_id}}."
+  utter_escalate_case:
+    - text: "This case has been escalated to a case manager. You will be notified when there is an update."
+  utter_ask_for_insurance_details:
+    - text: "Please provide the insurance provider's name and policy number."
+  utter_service_scheduled:
+    - text: "The service has been scheduled for {{appointment_date}} at {{appointment_time}}."
+  utter_provide_discharge_date:
+    - text: "The discharge date for this patient is {{discharge_date}}."
+  utter_documentation_requirements:
+    - text: "Here are the documentation requirements for the requested service: {{documentation_requirements}}."
+  utter_ask_for_medication_name:
+    - text: "Please provide the name of the medication."
+  utter_medication_refill_status:
+    - text: "The refill status for medication {{medication_name}} is {{medication_refill_status}}."
+  utter_ask_for_lab_results:
+    - text: "Please provide the lab test ID for retrieving the results."
+  utter_provide_lab_results_status:
+    - text: "The status of lab test ID {{lab_test_id}} is {{test_results_status}}."
+  utter_ask_for_radiology_order:
+    - text: "Please provide the radiology order ID."
+  utter_provide_radiology_results_status:
+    - text: "The status of radiology order ID {{radiology_order_id}} is {{test_results_status}}."
+  utter_request_patient_history:
+    - text: "Can you provide details on the patient's medical history?"
+  utter_provide_treatment_plan:
+    - text: "The current treatment plan for the patient includes {{treatment_plan}}."
+  utter_check_medication_coverage:
+    - text: "I am checking coverage for the medication {{medication_name}}."
+  utter_medication_coverage_results:
+    - text: "The medication {{medication_name}} is {{medication_coverage_status}} under the patient's insurance plan."
+  utter_provide_next_steps:
+    - text: "The next steps for this case are: {{next_steps}}."
+  utter_service_denied:
+    - text: "Unfortunately, the service has been denied for the following reason: {{denial_reason}}."
+  utter_service_approved:
+    - text: "The service has been approved. The authorization number is {{authorization_number}}."
+  utter_schedule_followup_appointment:
+    - text: "Would you like to schedule a follow-up appointment for this patient?"
+  utter_provide_care_plan_details:
+    - text: "Here are the details of the patient's care plan: {{care_plan_details}}."
+  utter_authorization_expired:
+    - text: "The authorization for this service has expired. Please resubmit the request for approval."
+  utter_insurance_coverage_type:
+    - text: "The coverage type for this patient is {{coverage_type}}, and the plan type is {{plan_type}}."
+
+actions:
+  - action_submit_prior_authorization
+  - action_check_eligibility
+  - action_check_claim_status
+  - action_submit_claim
+  - action_initiate_peer_review
+  - action_escalate_case
+  - action_provide_billing_details
+  - action_check_appeal_status
+  - action_submit_appeal
+  - action_check_grievance_status
+  - action_submit_grievance
+  - action_request_additional_documents
+  - action_check_authorization_status
+  - action_provide_discharge_details
+  - action_schedule_followup_appointment
+  - action_check_medication_coverage
+  - action_check_medication_refill_status
+  - action_check_lab_results
+  - action_check_radiology_results
+  - action_retrieve_patient_history
+  - action_provide_treatment_plan
+  - action_check_medication_coverage
+  - action_submit_prescription_request
+  - action_check_prescription_status
+  - action_provide_care_plan_details
+  - action_request_preauthorization
+  - action_check_coverage
+  - action_provide_authorization_status
+  - action_request_additional_information
+  - action_schedule_appointment
+  - action_provide_guideline_reference
+  - action_check_reconsideration_status
+  - action_initiate_referral
+  - action_check_referral_status
+  - action_update_patient_information
+  - action_provide_next_steps
+  - action_check_deductible_status
+  - action_check_out_of_pocket_status
+  - action_submit_documentation
+  - action_verify_provider_in_network_status
+  - action_check_interpreter_availability
+  - action_provide_discharge_instructions
+  - action_check_authorization_expiration
+  - action_check_plan_exclusions
+  - action_check_documentation_requirements
+  - action_check_pharmacy_location
+  - action_check_lab_order_status
+  - action_provide_medication_refill_status
+  - action_update_case_manager
+  - action_update_medical_history
+  - action_provide_health_plan_information
+  - action_check_drug_allergies
+  - action_submit_clinical_notes
+  - action_check_claim_denial_reason
+  - action_provide_appeal_rights_information
+
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
+
