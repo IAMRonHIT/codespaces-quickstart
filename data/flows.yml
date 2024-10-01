@@ -1,0 +1,1077 @@
+version: '3.1'
+
+flows:
+  # Flow for Prior Authorization Submission
+  prior_authorization_submission:
+    description: >
+      Facilitates the submission of prior authorization requests for services such as outpatient surgeries, inpatient stays, and Durable Medical Equipment (DME).
+    steps:
+      - collect: user_role
+        next:
+          - if: "slots.user_role in ['Provider', 'Payer']"
+            then:
+              - action: utter_greet_user
+              - next: collect_patient_info
+          - else:
+              - action: utter_invalid_user_role
+              - next: END
+
+      - id: collect_patient_info
+        steps:
+          - collect: first_name
+          - collect: last_name
+          - collect: date_of_birth
+          - collect: ssn_last_four
+        next:
+          - if: "slots.first_name and slots.last_name and slots.date_of_birth and slots.ssn_last_four"
+            then: collect_provider_info
+          - else:
+              - action: utter_missing_patient_info
+              - next: collect_patient_info
+
+      - id: collect_provider_info
+        steps:
+          - collect: provider_name
+          - collect: provider_npi
+          - collect: provider_tin
+          - collect: phone_number
+          - collect: fax_number
+        next:
+          - if: "slots.provider_name and slots.provider_npi and slots.provider_tin"
+            then: collect_service_info
+          - else:
+              - action: utter_missing_provider_info
+              - next: collect_provider_info
+
+      - id: collect_service_info
+        steps:
+          - collect: facility_name
+          - collect: facility_npi
+          - collect: facility_tin
+          - collect: servicing_address
+          - collect: billing_address
+          - collect: cpt_code
+          - collect: icd_10
+          - collect: service_type
+          - collect: units
+          - collect: date_from
+          - collect: date_to
+        next:
+          - if: "slots.cpt_code and slots.icd_10 and slots.service_type and slots.units and slots.date_from and slots.date_to"
+            then: pre_check
+          - else:
+              - action: utter_missing_service_info
+              - next: collect_service_info
+
+      - id: pre_check
+        steps:
+          - action: action_pre_check
+        next:
+          - if: "slots.readiness_indicator >= 0.8"
+            then: eligibility_verification
+          - else:
+              - action: utter_pre_check_failed
+              - next: END
+
+      - id: eligibility_verification
+        steps:
+          - action: action_check_eligibility
+        next:
+          - if: "slots.eligibility_status == 'Eligible'"
+            then: submit_prior_authorization
+          - else:
+              - action: utter_patient_ineligible
+              - next: END
+
+      - id: submit_prior_authorization
+        steps:
+          - action: action_submit_prior_authorization
+        next:
+          - if: "slots.request_id"
+            then:
+              - action: utter_prior_auth_submitted
+              - next: END
+          - else:
+              - action: utter_submission_failed
+              - next: END
+
+  # Flow for Updating Patient Information
+  update_patient_info_flow:
+    description: >
+      Allows users to update patient information during the process.
+    steps:
+      - action: utter_ask_update_field
+      - collect: field_to_update
+      - collect: new_value
+      - action: action_update_patient_info
+      - action: utter_patient_info_updated
+      - next: RETURN
+
+  # Flow for Handling Corrections
+  correction_flow:
+    description: >
+      Handles corrections when users provide incorrect information.
+    steps:
+      - action: utter_ask_correction
+      - collect: field_to_correct
+      - collect: corrected_value
+      - action: action_correct_slot
+      - action: utter_slot_corrected
+      - next: RETURN
+
+  # Flow for Twilio IVR Integration
+  twilio_ivr_flow:
+    description: >
+      Handles inbound/outbound IVR interactions via Twilio.
+    steps:
+      - action: action_handle_twilio_ivr
+      - next: END
+
+  # Flow for Knowledge Base Querying
+  knowledge_base_querying_flow:
+    description: >
+      Allows users to query the knowledge base for detailed information.
+    steps:
+      - collect: knowledge_query
+      - action: action_query_knowledge_base
+      - action: action_handle_knowledge_base
+      - next: END
+
+  # Flow for End-to-End Testing with Assertions
+  end_to_end_testing_flow:
+    description: >
+      Executes end-to-end tests to validate the assistant's performance.
+    steps:
+      - action: perform_e2e_tests
+      - action: report_test_results
+      - next: END
+
+  # Flow for Load Testing Procedures
+  load_testing_procedures_flow:
+    description: >
+      Conducts load testing to assess assistant performance under high traffic.
+    steps:
+      - action: initiate_load_testing
+      - action: monitor_performance_metrics
+      - action: generate_load_test_report
+      - next: END
+
+  # Flow for Custom Slot Handling
+  custom_slot_handling_flow:
+    description: >
+      Implements custom logic for slot extraction and validation.
+    steps:
+      - collect: field_to_validate
+      - action: ValidateCustomSlotMappings
+      - if: "slots.field_validation_status == 'valid'"
+        then:
+          - action: utter_slot_set_success
+        else:
+          - action: utter_invalid_slot_value
+      - next: END
+
+  # Flow for Sanic Extensions Implementation
+  sanic_extensions_implementation_flow:
+    description: >
+      Extends Sanic functionalities with custom middlewares and listeners.
+    steps:
+      - action: attach_sanic_app_extensions
+      - action: utter_sanic_extensions_attached
+      - next: END
+
+  # Flow for Advanced Knowledge Base Handling
+  advanced_knowledge_base_handling_flow:
+    description: >
+      Manages complex queries and actions related to the knowledge base.
+    steps:
+      - collect: advanced_kb_query
+      - action: ActionQueryKnowledgeBase
+      - action: ActionHandleKnowledgeBase
+      - next: END
+
+  # Flow for Chat Widget Setup and Customization
+  chat_widget_setup_flow:
+    description: >
+      Configures and customizes the Rasa Chat Widget for seamless integration.
+    steps:
+      - action: setup_chat_widget
+      - action: customize_chat_widget
+      - action: utter_chat_welcome
+      - next: END
+
+  # Flow for Security and Compliance Enforcement
+  security_compliance_enforcement_flow:
+    description: >
+      Ensures all interactions comply with security protocols and healthcare regulations.
+    steps:
+      - action: enforce_security_measures
+      - action: verify_compliance
+      - if: "slots.compliance_status == 'verified'"
+        then:
+          - action: utter_security_compliance_verified
+        else:
+          - action: utter_security_compliance_failed
+      - next: END
+
+  # Flow for Deployment Strategies and Scalability Planning
+  deployment_scalability_flow:
+    description: >
+      Manages the deployment and scalability of the assistant to handle varying loads.
+    steps:
+      - action: deploy_assistant
+      - action: configure_scalability_settings
+      - action: monitor_deployment_status
+      - next: END
+
+  # Flow for Maintenance and Continuous Improvement Procedures
+  maintenance_continuous_improvement_flow:
+    description: >
+      Oversees ongoing maintenance and enhancements for continuous improvement.
+    steps:
+      - action: schedule_maintenance
+      - action: collect_user_feedback
+      - action: implement_improvements
+      - next: END
+
+  # Flow for Comprehensive Testing Implementation
+  comprehensive_testing_flow:
+    description: >
+      Implements a comprehensive testing framework, including unit, integration, and end-to-end tests.
+    steps:
+      - action: run_unit_tests
+      - action: run_integration_tests
+      - action: run_end_to_end_tests
+      - action: generate_test_reports
+      - next: END
+
+  # Flow for User Support and Feedback Handling
+  user_support_feedback_flow:
+    description: >
+      Provides mechanisms for user support and feedback collection.
+    steps:
+      - collect: support_request
+      - if: "slots.support_request_type == 'feedback'"
+        then:
+          - action: action_handle_feedback
+          - action: utter_thank_feedback
+        else:
+          - action: action_provide_support
+          - action: utter_provide_support_info
+      - next: END
+
+  # Flow for Conversation Repair Handling
+  conversation_repair_flow:
+    description: >
+      Handles conversation deviations, corrections, cancellations, and chitchat.
+    steps:
+      - action: handle_conversation_repair
+      - next: RETURN
+
+  # Flow for Multi-Modal Interactions
+  multi_modal_interactions_flow:
+    description: >
+      Manages multi-modal inputs such as image uploads for insurance cards or medical documents.
+    steps:
+      - collect: document_upload
+      - action: action_process_uploaded_document
+      - if: "slots.document_processing_status == 'success'"
+        then:
+          - action: utter_document_processed
+        else:
+          - action: utter_document_processing_failed
+      - next: END
+
+  # Flow for Human Handoff
+  human_handoff_flow:
+    description: >
+      Facilitates seamless transition to a human agent when necessary.
+    steps:
+      - action: initiate_human_handoff
+      - action: notify_human_agent
+      - action: utter_handoff_confirmation
+      - next: END
+
+  # Flow for Intentless Interaction Handling
+  intentless_interaction_flow:
+    description: >
+      Handles chitchat, contextual questions, and high-stakes responses without relying on predefined intents.
+    steps:
+      - action: handle_intentless_interaction
+      - action: utter_intentless_response
+      - next: END
+
+  # Flow for Contextual Response Rephrasing
+  contextual_response_rephrasing_flow:
+    description: >
+      Dynamically rephrases responses to make interactions more natural and engaging.
+    steps:
+      - action: rephrase_response
+      - action: utter_rephrased_response
+      - next: END
+
+  # Flow for Enterprise Search Integration
+  enterprise_search_integration_flow:
+    description: >
+      Integrates EnterpriseSearchPolicy for retrieving information from vector stores and knowledge bases.
+    steps:
+      - collect: enterprise_search_query
+      - action: action_enterprise_search
+      - action: utter_enterprise_search_results
+      - next: END
+
+  # Flow for Session Management
+  session_management_flow:
+    description: >
+      Manages user sessions, including initiation and termination.
+    steps:
+      - action: action_session_start
+      - action: utter_session_start
+      - next: END
+
+  # Flow for Slot Resetting and Clearing
+  slot_resetting_flow:
+    description: >
+      Resets or clears specific slots based on user actions or conversation flow.
+    steps:
+      - collect: slots_to_reset
+      - action: action_reset_slots
+      - action: utter_slots_reset
+      - next: END
+
+  # Flow for Data Synchronization with EHR Systems
+  data_synchronization_ehr_flow:
+    description: >
+      Synchronizes collected data with Electronic Health Record (EHR) systems.
+    steps:
+      - action: action_sync_with_ehr
+      - if: "slots.ehr_sync_status == 'success'"
+        then:
+          - action: utter_ehr_sync_success
+        else:
+          - action: utter_ehr_sync_failed
+      - next: END
+
+  # Flow for Appointment Scheduling
+  appointment_scheduling_flow:
+    description: >
+      Guides users through scheduling medical appointments.
+    steps:
+      - collect: appointment_type
+      - collect: appointment_date
+      - collect: appointment_time
+      - action: action_schedule_appointment
+      - if: "slots.appointment_status == 'scheduled'"
+        then:
+          - action: utter_appointment_scheduled
+        else:
+          - action: utter_appointment_scheduling_failed
+      - next: END
+
+  # Flow for Medication Reconciliation
+  medication_reconciliation_flow:
+    description: >
+      Automates the process of reconciling patient medications.
+    steps:
+      - collect: patient_medications
+      - action: action_reconcile_medications
+      - if: "slots.reconciliation_status == 'completed'"
+        then:
+          - action: utter_medication_reconciliation_complete
+        else:
+          - action: utter_medication_reconciliation_failed
+      - next: END
+
+  # Flow for Real-Time Translation Services
+  real_time_translation_flow:
+    description: >
+      Provides real-time translation services for multilingual support.
+    steps:
+      - collect: user_language
+      - action: action_translate_interaction
+      - action: utter_translation_complete
+      - next: END
+
+  # Flow for Document Understanding and Classification
+  document_understanding_flow:
+    description: >
+      Processes and classifies uploaded medical documents using OCR and NLP.
+    steps:
+      - collect: document_upload
+      - action: action_extract_text_from_document
+      - action: action_classify_document
+      - if: "slots.document_classification == 'valid'"
+        then:
+          - action: utter_document_classified
+        else:
+          - action: utter_document_classification_failed
+      - next: END
+
+  # Flow for Handling Internal Errors
+  internal_error_handling_flow:
+    description: >
+      Manages internal errors gracefully, informing the user and prompting for alternative actions.
+    steps:
+      - action: handle_internal_error
+      - action: utter_internal_error_message
+      - next: END
+
+  # Flow for Data Analysis Requests
+  data_analysis_flow:
+    description: >
+      Handles requests for analyzing imaging and lab results.
+    steps:
+      - collect: analysis_type
+      - collect: analysis_data
+      - action: action_perform_data_analysis
+      - if: "slots.analysis_status == 'completed'"
+        then:
+          - action: utter_data_analysis_complete
+        else:
+          - action: utter_data_analysis_failed
+      - next: END
+
+  # Flow for Resetting the Conversation
+  reset_conversation_flow:
+    description: >
+      Resets the current conversation, clearing all slots and starting fresh.
+    steps:
+      - action: action_restart
+      - action: utter_restart_confirmation
+      - next: END
+
+  # Flow for Handling Unsupported Features
+  unsupported_feature_flow:
+    description: >
+      Informs users when they request features that are not supported.
+    steps:
+      - action: utter_unsupported_feature
+      - next: END
+
+  # Flow for Health Compliance Verification
+  health_compliance_verification_flow:
+    description: >
+      Verifies that all interactions comply with healthcare regulations and standards.
+    steps:
+      - action: verify_health_compliance
+      - if: "slots.compliance_status == 'verified'"
+        then:
+          - action: utter_compliance_verified
+        else:
+          - action: utter_compliance_issue_detected
+      - next: END
+
+  # Flow for Handling Chitchat
+  chitchat_flow:
+    description: >
+      Manages small talk and off-topic conversations gracefully.
+    steps:
+      - action: handle_chitchat
+      - action: utter_chitchat_response
+      - next: END
+
+  # Flow for Providing Help and Guidance
+  help_guidance_flow:
+    description: >
+      Offers help and guidance to users seeking assistance.
+    steps:
+      - action: utter_provide_help
+      - next: END
+
+  # Flow for Confirmation Prompts
+  confirmation_prompts_flow:
+    description: >
+      Implements confirmation prompts for critical actions.
+    steps:
+      - collect: confirmation_response
+      - if: "slots.confirmation_response == 'yes'"
+        then:
+          - action: proceed_with_action
+        - else:
+          - action: cancel_action
+      - next: END
+
+  # Flow for Repeating Information
+  repeat_information_flow:
+    description: >
+      Allows users to request repetition of previously provided information.
+    steps:
+      - action: utter_repeat_information
+      - next: END
+
+  # Flow for Handling Payment Processes
+  payment_process_flow:
+    description: >
+      Manages payment-related interactions, including collecting payment details and processing transactions.
+    steps:
+      - collect: payment_method
+      - collect: payment_details
+      - action: action_process_payment
+      - if: "slots.payment_status == 'success'"
+        then:
+          - action: utter_payment_success
+        else:
+          - action: utter_payment_failure
+      - next: END
+
+  # Flow for Appointment Reminders
+  appointment_reminder_flow:
+    description: >
+      Sends and manages appointment reminders to patients.
+    steps:
+      - collect: reminder_preferences
+      - action: action_set_reminder
+      - action: utter_reminder_set
+      - next: END
+
+  # Flow for Medication Reminders
+  medication_reminder_flow:
+    description: >
+      Sends and manages medication reminders to patients.
+    steps:
+      - collect: medication_schedule
+      - action: action_set_medication_reminder
+      - action: utter_medication_reminder_set
+      - next: END
+
+  # Flow for Handling Feedback and Ratings
+  feedback_rating_flow:
+    description: >
+      Collects user feedback and ratings to improve the assistant.
+    steps:
+      - collect: user_feedback
+      - collect: user_rating
+      - action: action_store_feedback
+      - action: utter_thank_feedback
+      - next: END
+
+  # Flow for Data Encryption and Secure Transmission
+  data_encryption_flow:
+    description: >
+      Ensures all data transmissions are encrypted and securely handled.
+    steps:
+      - action: encrypt_data
+      - action: transmit_data_securely
+      - if: "slots.encryption_status == 'success'"
+        then:
+          - action: utter_data_encrypted
+        else:
+          - action: utter_encryption_failed
+      - next: END
+
+  # Flow for User Authentication and Authorization
+  user_authentication_flow:
+    description: >
+      Authenticates and authorizes users before granting access to sensitive features.
+    steps:
+      - collect: user_credentials
+      - action: action_authenticate_user
+      - if: "slots.auth_status == 'authenticated'"
+        then:
+          - action: utter_auth_success
+        else:
+          - action: utter_auth_failure
+      - next: END
+
+  # Flow for Data Backup and Recovery
+  data_backup_recovery_flow:
+    description: >
+      Manages data backup processes and recovery in case of system failures.
+    steps:
+      - action: initiate_data_backup
+      - action: verify_backup_success
+      - if: "slots.backup_status == 'success'"
+        then:
+          - action: utter_backup_complete
+        else:
+          - action: utter_backup_failed
+      - next: END
+
+  # Flow for System Health Monitoring
+  system_health_monitoring_flow:
+    description: >
+      Monitors the system's health and performance metrics.
+    steps:
+      - action: monitor_system_health
+      - action: report_system_health
+      - next: END
+
+  # Flow for Updating the Assistant
+  assistant_update_flow:
+    description: >
+      Manages updates and upgrades to the assistant's capabilities.
+    steps:
+      - action: check_for_updates
+      - if: "slots.update_available == 'yes'"
+        then:
+          - action: perform_update
+          - action: utter_update_success
+        else:
+          - action: utter_no_update
+      - next: END
+
+  # Flow for Data Analytics and Reporting
+  data_analytics_reporting_flow:
+    description: >
+      Handles requests for data analytics and generates reports based on collected data.
+    steps:
+      - collect: analytics_request
+      - action: action_generate_report
+      - if: "slots.report_status == 'generated'"
+        then:
+          - action: utter_report_ready
+        else:
+          - action: utter_report_generation_failed
+      - next: END
+
+  # Flow for Handling Unrecognized Inputs
+  unrecognized_input_flow:
+    description: >
+      Manages situations where user input is not recognized or understood.
+    steps:
+      - action: utter_unrecognized_input
+      - action: utter_suggest_help
+      - next: END
+
+  # Flow for User Logout and Session Termination
+  user_logout_flow:
+    description: >
+      Facilitates user logout and terminates the session securely.
+    steps:
+      - action: action_logout_user
+      - action: utter_logout_confirmation
+      - next: END
+
+  # Flow for Interactive Forms and Surveys
+  interactive_forms_surveys_flow:
+    description: >
+      Conducts interactive forms and surveys to gather user feedback and information.
+    steps:
+      - collect: survey_question_1
+      - collect: survey_question_2
+      - collect: survey_question_3
+      - action: action_store_survey_responses
+      - action: utter_survey_complete
+      - next: END
+
+  # Flow for Handling Timeouts and Inactivity
+  timeout_inactivity_flow:
+    description: >
+      Manages scenarios where the user is inactive or the conversation times out.
+    steps:
+      - action: handle_timeout
+      - action: utter_timeout_message
+      - next: END
+
+  # Flow for Data Import and Export
+  data_import_export_flow:
+    description: >
+      Handles data import from and export to external systems securely.
+    steps:
+      - collect: data_import_export_request
+      - action: action_import_data
+      - action: action_export_data
+      - if: "slots.import_export_status == 'success'"
+        then:
+          - action: utter_import_export_success
+        else:
+          - action: utter_import_export_failed
+      - next: END
+
+  # Flow for User Profile Management
+  user_profile_management_flow:
+    description: >
+      Allows users to manage and update their profiles and preferences.
+    steps:
+      - collect: profile_update_field
+      - collect: profile_update_value
+      - action: action_update_user_profile
+      - action: utter_profile_update_success
+      - next: END
+
+  # Flow for Notification Preferences
+  notification_preferences_flow:
+    description: >
+      Manages user preferences for receiving notifications and alerts.
+    steps:
+      - collect: notification_preference
+      - action: action_set_notification_preferences
+      - action: utter_notification_preferences_set
+      - next: END
+
+  # Flow for Handling Legal and Compliance Queries
+  legal_compliance_queries_flow:
+    description: >
+      Provides information and handles queries related to legal and compliance matters.
+    steps:
+      - collect: legal_compliance_query
+      - action: action_handle_legal_compliance_query
+      - action: utter_legal_compliance_response
+      - next: END
+
+  # Flow for Backup Authentication
+  backup_authentication_flow:
+    description: >
+      Provides backup authentication mechanisms for enhanced security.
+    steps:
+      - collect: backup_auth_method
+      - action: action_backup_authenticate
+      - if: "slots.backup_auth_status == 'authenticated'"
+        then:
+          - action: utter_backup_auth_success
+        else:
+          - action: utter_backup_auth_failure
+      - next: END
+
+  # Flow for Emergency Assistance
+  emergency_assistance_flow:
+    description: >
+      Handles emergency assistance requests, ensuring swift and appropriate responses.
+    steps:
+      - collect: emergency_details
+      - action: action_handle_emergency
+      - action: utter_emergency_confirmation
+      - next: END
+
+  # Flow for Feedback Analysis and Reporting
+  feedback_analysis_reporting_flow:
+    description: >
+      Analyzes collected feedback and generates insightful reports for continuous improvement.
+    steps:
+      - action: action_analyze_feedback
+      - action: action_generate_feedback_report
+      - if: "slots.feedback_report_status == 'generated'"
+        then:
+          - action: utter_feedback_report_ready
+        else:
+          - action: utter_feedback_report_failed
+      - next: END
+
+  # Flow for Data Anonymization and Privacy
+  data_anonymization_privacy_flow:
+    description: >
+      Ensures all user data is anonymized and handled with utmost privacy.
+    steps:
+      - action: action_anonymize_data
+      - if: "slots.anonymization_status == 'completed'"
+        then:
+          - action: utter_data_anonymized
+        else:
+          - action: utter_data_anonymization_failed
+      - next: END
+  consent_management_flow:
+    description: >
+      Manages user consent for data processing and privacy preferences.
+    steps:
+      - collect: consent_type
+        description: "Determine the type of consent the user wants to manage."
+      - collect: consent_decision
+        description: "Ask the user to provide their consent decision."
+      - action: action_update_consent
+      - if: "slots.consent_decision == 'agree'"
+        then:
+          - action: utter_consent_agreed
+        else:
+          - action: utter_consent_declined
+      - next: END
+
+  # Flow for Billing Inquiries
+  billing_inquiries_flow:
+    description: >
+      Handles user inquiries related to billing, including viewing bills, making payments, and updating billing information.
+    steps:
+      - collect: billing_inquiry_type
+        description: "Ask the user the type of billing inquiry they have."
+      - if: "slots.billing_inquiry_type == 'view_bill'"
+        then: view_bill_flow
+        else:
+          - if: "slots.billing_inquiry_type == 'make_payment'"
+            then: make_payment_flow
+            else:
+              - if: "slots.billing_inquiry_type == 'update_info'"
+                then: update_billing_info_flow
+                else:
+                  - action: utter_invalid_billing_inquiry
+                  - next: END
+
+  # Sub-flow for Viewing Bills
+  view_bill_flow:
+    description: >
+      Allows users to view their billing statements.
+    steps:
+      - collect: billing_account_number
+      - action: action_view_bill
+      - if: "slots.bill_available == 'yes'"
+        then:
+          - action: utter_bill_details
+        else:
+          - action: utter_no_bills_found
+      - next: END
+
+  # Sub-flow for Making Payments
+  make_payment_flow:
+    description: >
+      Facilitates the process of making payments for outstanding bills.
+    steps:
+      - collect: payment_amount
+      - collect: payment_method
+      - action: action_process_payment
+      - if: "slots.payment_status == 'success'"
+        then:
+          - action: utter_payment_success
+        else:
+          - action: utter_payment_failure
+      - next: END
+
+  # Sub-flow for Updating Billing Information
+  update_billing_info_flow:
+    description: >
+      Allows users to update their billing information.
+    steps:
+      - collect: billing_info_field
+      - collect: new_billing_info
+      - action: action_update_billing_info
+      - if: "slots.update_status == 'success'"
+        then:
+          - action: utter_billing_info_updated
+        else:
+          - action: utter_billing_info_update_failed
+      - next: END
+
+  # Flow for Appointment Rescheduling
+  appointment_rescheduling_flow:
+    description: >
+      Guides users through the process of rescheduling their medical appointments.
+    steps:
+      - collect: appointment_id
+        description: "Ask for the appointment ID that needs to be rescheduled."
+      - collect: new_appointment_date
+        description: "Ask for the new appointment date."
+      - collect: new_appointment_time
+        description: "Ask for the new appointment time."
+      - action: action_reschedule_appointment
+      - if: "slots.reschedule_status == 'success'"
+        then:
+          - action: utter_appointment_rescheduled
+        else:
+          - action: utter_reschedule_failed
+      - next: END
+
+  # Flow for Data Privacy Requests
+  data_privacy_requests_flow:
+    description: >
+      Handles user requests related to data privacy, such as accessing, deleting, or modifying personal data.
+    steps:
+      - collect: privacy_request_type
+        description: "Ask the user the type of data privacy request they have."
+      - collect: user_identity
+        description: "Verify the user's identity to process the request."
+      - collect: request_details
+        description: "Gather details about the data privacy request."
+      - action: action_handle_privacy_request
+      - if: "slots.privacy_request_status == 'completed'"
+        then:
+          - action: utter_privacy_request_completed
+        else:
+          - action: utter_privacy_request_failed
+      - next: END
+
+  # Flow for Secure Messaging
+  secure_messaging_flow:
+    description: >
+      Enables secure messaging between users and healthcare providers.
+    steps:
+      - collect: message_recipient
+        description: "Ask the user who they want to send a message to."
+      - collect: message_content
+        description: "Ask the user for the message content."
+      - action: action_send_secure_message
+      - if: "slots.message_status == 'sent'"
+        then:
+          - action: utter_message_sent
+        else:
+          - action: utter_message_failed
+      - next: END
+
+  # Flow for Consent Management Notifications
+  consent_management_notifications_flow:
+    description: >
+      Notifies users about their consent status and updates.
+    steps:
+      - action: action_notify_consent_status
+      - action: utter_consent_notification
+      - next: END
+
+  # Flow for Billing Dispute Resolution
+  billing_dispute_resolution_flow:
+    description: >
+      Assists users in resolving billing disputes and discrepancies.
+    steps:
+      - collect: dispute_issue
+        description: "Ask the user to describe the billing issue."
+      - action: action_resolve_billing_dispute
+      - if: "slots.dispute_resolution == 'resolved'"
+        then:
+          - action: utter_dispute_resolved
+        else:
+          - action: utter_dispute_unresolved
+      - next: END
+
+  # Flow for User Feedback and Suggestions
+  user_feedback_suggestions_flow:
+    description: >
+      Collects user feedback and suggestions to improve the assistant's services.
+    steps:
+      - collect: feedback_type
+        description: "Ask the user the type of feedback they want to provide."
+      - collect: feedback_content
+        description: "Ask the user to provide their feedback or suggestion."
+      - action: action_store_feedback
+      - action: utter_feedback_received
+      - next: END
+
+  # Flow for Handling Multi-Step Commands
+  multi_step_commands_flow:
+    description: >
+      Manages multi-step commands that require several user inputs and actions.
+    steps:
+      - action: action_start_multi_step_command
+      - collect: step_one_input
+      - action: action_process_step_one
+      - collect: step_two_input
+      - action: action_process_step_two
+      - if: "slots.multi_step_status == 'completed'"
+        then:
+          - action: utter_multi_step_completed
+        else:
+          - action: utter_multi_step_failed
+      - next: END
+
+  # Flow for Data Import Requests
+  data_import_requests_flow:
+    description: >
+      Handles requests to import data from external sources into the assistant's system.
+    steps:
+      - collect: data_source
+        description: "Ask the user to specify the data source for import."
+      - collect: data_format
+        description: "Ask the user to specify the format of the data."
+      - action: action_import_data
+      - if: "slots.import_status == 'success'"
+        then:
+          - action: utter_data_imported
+        else:
+          - action: utter_data_import_failed
+      - next: END
+
+  # Flow for Data Export Requests
+  data_export_requests_flow:
+    description: >
+      Manages requests to export data from the assistant's system to external destinations.
+    steps:
+      - collect: export_destination
+        description: "Ask the user to specify the destination for data export."
+      - collect: export_format
+        description: "Ask the user to specify the format of the exported data."
+      - action: action_export_data
+      - if: "slots.export_status == 'success'"
+        then:
+          - action: utter_data_exported
+        else:
+          - action: utter_data_export_failed
+      - next: END
+
+  # Flow for User Profile Management
+  user_profile_management_flow:
+    description: >
+      Allows users to manage and update their profiles and preferences.
+    steps:
+      - collect: profile_update_field
+        description: "Ask the user which profile field they want to update."
+      - collect: profile_update_value
+        description: "Ask the user for the new value of the selected profile field."
+      - action: action_update_user_profile
+      - if: "slots.update_status == 'success'"
+        then:
+          - action: utter_profile_update_success
+        else:
+          - action: utter_profile_update_failed
+      - next: END
+
+  # Flow for Notification Preferences
+  notification_preferences_flow:
+    description: >
+      Manages user preferences for receiving notifications and alerts.
+    steps:
+      - collect: notification_preference
+        description: "Ask the user to specify their notification preferences."
+      - action: action_set_notification_preferences
+      - if: "slots.notification_status == 'set'"
+        then:
+          - action: utter_notification_preferences_set
+        else:
+          - action: utter_notification_preferences_failed
+      - next: END
+
+  # Flow for Handling Legal and Compliance Queries
+  legal_compliance_queries_flow:
+    description: >
+      Provides information and handles queries related to legal and compliance matters.
+    steps:
+      - collect: legal_compliance_query
+        description: "Ask the user to specify their legal or compliance-related query."
+      - action: action_handle_legal_compliance_query
+      - action: utter_legal_compliance_response
+      - next: END
+
+  # Flow for Backup Authentication
+  backup_authentication_flow:
+    description: >
+      Provides backup authentication mechanisms for enhanced security.
+    steps:
+      - collect: backup_auth_method
+        description: "Ask the user to choose a backup authentication method."
+      - action: action_backup_authenticate
+      - if: "slots.backup_auth_status == 'authenticated'"
+        then:
+          - action: utter_backup_auth_success
+        else:
+          - action: utter_backup_auth_failure
+      - next: END
+
+  # Flow for Emergency Assistance
+  emergency_assistance_flow:
+    description: >
+      Handles emergency assistance requests, ensuring swift and appropriate responses.
+    steps:
+      - collect: emergency_details
+        description: "Ask the user to provide details about the emergency."
+      - action: action_handle_emergency
+      - action: utter_emergency_confirmation
+      - next: END
+
+  # Flow for Feedback Analysis and Reporting
+  feedback_analysis_reporting_flow:
+    description: >
+      Analyzes collected feedback and generates insightful reports for continuous improvement.
+    steps:
+      - action: action_analyze_feedback
+      - action: action_generate_feedback_report
+      - if: "slots.feedback_report_status == 'generated'"
+        then:
+          - action: utter_feedback_report_ready
+        else:
+          - action: utter_feedback_report_failed
+      - next: END
+
+  # Flow for Data Anonymization and Privacy
+  data_anonymization_privacy_flow:
+    description: >
+      Ensures all user data is anonymized and handled with utmost privacy.
+    steps:
+      - action: action_anonymize_data
+      - if: "slots.anonymization_status == 'completed'"
+        then:
+          - action: utter_data_anonymized
+        else:
+          - action: utter_data_anonymization_failed
+      - next: END
