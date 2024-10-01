@@ -1075,3 +1075,377 @@ flows:
         else:
           - action: utter_data_anonymization_failed
       - next: END
+# Flow for Updating Insurance Information
+update_insurance_info_flow:
+  description: >
+    Guides users through updating their insurance information, such as policy number, coverage type, and deductible details.
+  steps:
+    - collect: insurance_provider_name
+    - collect: insurance_policy_number
+    - collect: insurance_group_number
+    - collect: deductible_amount
+    - collect: copayment_amount
+    - collect: out_of_pocket_max
+    - action: action_update_insurance_info
+    - if: "slots.update_status == 'success'"
+      then:
+        - action: utter_insurance_info_updated
+      else:
+        - action: utter_update_failed
+    - next: END
+
+# Flow for Submitting Claims
+submit_claim_flow:
+  description: >
+    Manages the submission of medical claims for reimbursement or payment processing.
+  steps:
+    - collect: claim_type
+    - collect: claim_number
+    - collect: service_date
+    - collect: service_thru
+    - collect: procedure_code
+    - collect: diagnosis_code
+    - collect: total_billed_amount
+    - collect: patient_responsibility
+    - action: action_submit_claim
+    - if: "slots.claim_status == 'submitted'"
+      then:
+        - action: utter_claim_submitted
+      else:
+        - action: utter_claim_submission_failed
+    - next: END
+
+# Flow for Claim Status Inquiry
+claim_status_inquiry_flow:
+  description: >
+    Handles inquiries about the status of a submitted claim.
+  steps:
+    - collect: claim_number
+    - action: action_check_claim_status
+    - if: "slots.claim_status == 'processed'"
+      then:
+        - action: utter_claim_processed
+      else:
+        - action: utter_claim_pending
+    - next: END
+
+# Flow for Appeals Process
+appeals_process_flow:
+  description: >
+    Facilitates the submission and tracking of an appeal for a denied claim.
+  steps:
+    - collect: claim_number
+    - collect: appeal_reason
+    - action: action_submit_appeal
+    - if: "slots.appeal_status == 'submitted'"
+      then:
+        - action: utter_appeal_submitted
+      else:
+        - action: utter_appeal_submission_failed
+    - next: END
+
+# Flow for Reconsideration Requests
+reconsideration_request_flow:
+  description: >
+    Handles reconsideration requests for claim denials or other administrative decisions.
+  steps:
+    - collect: claim_number
+    - collect: reconsideration_reason
+    - action: action_submit_reconsideration
+    - if: "slots.reconsideration_status == 'submitted'"
+      then:
+        - action: utter_reconsideration_submitted
+      else:
+        - action: utter_reconsideration_submission_failed
+    - next: END
+
+# Flow for Referral Requests
+referral_request_flow:
+  description: >
+    Guides users through submitting a referral request to a specialist or another provider.
+  steps:
+    - collect: patient_id
+    - collect: referring_provider
+    - collect: specialist_name
+    - collect: referral_reason
+    - action: action_submit_referral
+    - if: "slots.referral_status == 'submitted'"
+      then:
+        - action: utter_referral_submitted
+      else:
+        - action: utter_referral_failed
+    - next: END
+
+# Flow for Prescription Refill Requests
+prescription_refill_request_flow:
+  description: >
+    Automates the process of requesting prescription refills.
+  steps:
+    - collect: medication_name
+    - collect: medication_dosage
+    - collect: pharmacy_name
+    - action: action_submit_prescription_refill
+    - if: "slots.prescription_refill_status == 'submitted'"
+      then:
+        - action: utter_prescription_refill_submitted
+      else:
+        - action: utter_prescription_refill_failed
+    - next: END
+
+# Flow for Lab Test Ordering
+lab_test_ordering_flow:
+  description: >
+    Allows users to request and order lab tests for patients.
+  steps:
+    - collect: lab_test_id
+    - collect: patient_id
+    - action: action_order_lab_test
+    - if: "slots.order_status == 'ordered'"
+      then:
+        - action: utter_lab_test_ordered
+      else:
+        - action: utter_lab_test_order_failed
+    - next: END
+
+# Flow for Lab Results Review
+lab_results_review_flow:
+  description: >
+    Provides users with lab test results and insights.
+  steps:
+    - collect: lab_order_id
+    - action: action_review_lab_results
+    - if: "slots.lab_results_status == 'available'"
+      then:
+        - action: utter_lab_results_available
+      else:
+        - action: utter_lab_results_pending
+    - next: END
+
+# Flow for Radiology Results Review
+radiology_results_review_flow:
+  description: >
+    Allows users to review radiology results, such as MRI or X-ray reports.
+  steps:
+    - collect: radiology_order_id
+    - action: action_review_radiology_results
+    - if: "slots.radiology_results_status == 'available'"
+      then:
+        - action: utter_radiology_results_available
+      else:
+        - action: utter_radiology_results_pending
+    - next: END
+
+# Flow for Specialist Referral Status Check
+specialist_referral_status_check_flow:
+  description: >
+    Enables users to check the status of specialist referral requests.
+  steps:
+    - collect: referral_id
+    - action: action_check_specialist_referral_status
+    - if: "slots.referral_status == 'approved'"
+      then:
+        - action: utter_referral_approved
+      else:
+        - action: utter_referral_pending
+    - next: END
+
+# Flow for Prior Authorization Expiration Check
+prior_authorization_expiration_check_flow:
+  description: >
+    Manages the check for prior authorization expiration dates and renewals.
+  steps:
+    - collect: prior_authorization_id
+    - action: action_check_prior_authorization_expiration
+    - if: "slots.authorization_expiration_date"
+      then:
+        - action: utter_authorization_expiration_info
+      else:
+        - action: utter_authorization_not_found
+    - next: END
+
+# Flow for Care Management Updates
+care_management_update_flow:
+  description: >
+    Allows care managers to update case management notes and tasks.
+  steps:
+    - collect: case_manager
+    - collect: care_plan_id
+    - collect: clinical_notes
+    - action: action_update_care_management
+    - if: "slots.update_status == 'success'"
+      then:
+        - action: utter_care_management_updated
+      else:
+        - action: utter_update_failed
+    - next: END
+# Flow for Care Plan Creation
+care_plan_creation_flow:
+  description: >
+    Guides care managers through the process of creating a new care plan for a patient.
+  steps:
+    - collect: patient_id
+    - collect: attending_physician
+    - collect: care_manager
+    - collect: diagnosis_code
+    - collect: treatment_plan
+    - action: action_create_care_plan
+    - if: "slots.care_plan_status == 'created'"
+      then:
+        - action: utter_care_plan_created
+      else:
+        - action: utter_care_plan_creation_failed
+    - next: END
+
+# Flow for Care Plan Update
+care_plan_update_flow:
+  description: >
+    Allows care managers to update the details of an existing care plan.
+  steps:
+    - collect: care_plan_id
+    - collect: field_to_update
+    - collect: new_value
+    - action: action_update_care_plan
+    - if: "slots.update_status == 'success'"
+      then:
+        - action: utter_care_plan_updated
+      else:
+        - action: utter_care_plan_update_failed
+    - next: END
+
+# Flow for Care Plan Review
+care_plan_review_flow:
+  description: >
+    Enables care managers, physicians, or patients to review the details of an active care plan.
+  steps:
+    - collect: care_plan_id
+    - action: action_review_care_plan
+    - if: "slots.care_plan_status == 'available'"
+      then:
+        - action: utter_care_plan_details
+      else:
+        - action: utter_no_care_plan_found
+    - next: END
+
+# Flow for Care Plan Closure
+care_plan_closure_flow:
+  description: >
+    Allows care managers to close or mark a care plan as completed.
+  steps:
+    - collect: care_plan_id
+    - collect: discharge_date
+    - action: action_close_care_plan
+    - if: "slots.closure_status == 'success'"
+      then:
+        - action: utter_care_plan_closed
+      else:
+        - action: utter_care_plan_closure_failed
+    - next: END
+
+# Flow for Adding Goals to Care Plan
+add_goals_to_care_plan_flow:
+  description: >
+    Adds specific goals and objectives to an existing care plan.
+  steps:
+    - collect: care_plan_id
+    - collect: goal_description
+    - collect: target_date
+    - action: action_add_goal_to_care_plan
+    - if: "slots.goal_status == 'added'"
+      then:
+        - action: utter_goal_added
+      else:
+        - action: utter_goal_addition_failed
+    - next: END
+
+# Flow for Care Plan Compliance Monitoring
+care_plan_compliance_monitoring_flow:
+  description: >
+    Monitors patient compliance with the care plan, including scheduled check-ins.
+  steps:
+    - collect: care_plan_id
+    - collect: patient_id
+    - collect: compliance_check_date
+    - action: action_monitor_care_plan_compliance
+    - if: "slots.compliance_status == 'compliant'"
+      then:
+        - action: utter_patient_compliant
+      else:
+        - action: utter_patient_non_compliant
+    - next: END
+
+# Flow for Care Plan Progress Check
+care_plan_progress_check_flow:
+  description: >
+    Tracks the progress made on a patient's care plan goals and objectives.
+  steps:
+    - collect: care_plan_id
+    - action: action_check_care_plan_progress
+    - if: "slots.progress_status == 'on_track'"
+      then:
+        - action: utter_care_plan_on_track
+      else:
+        - action: utter_care_plan_off_track
+    - next: END
+
+# Flow for Care Plan Reminders
+care_plan_reminder_flow:
+  description: >
+    Sends reminders to patients or care managers about upcoming tasks, appointments, or goals related to the care plan.
+  steps:
+    - collect: care_plan_id
+    - collect: reminder_type
+    - action: action_set_care_plan_reminder
+    - if: "slots.reminder_status == 'set'"
+      then:
+        - action: utter_reminder_set
+      else:
+        - action: utter_reminder_failed
+    - next: END
+
+# Flow for Care Plan Interdisciplinary Team Collaboration
+care_plan_team_collaboration_flow:
+  description: >
+    Facilitates communication and collaboration between interdisciplinary team members involved in the care plan.
+  steps:
+    - collect: care_plan_id
+    - collect: team_member_role
+    - collect: communication_message
+    - action: action_send_team_message
+    - if: "slots.communication_status == 'sent'"
+      then:
+        - action: utter_message_sent_to_team
+      else:
+        - action: utter_message_sending_failed
+    - next: END
+
+# Flow for Adding Interventions to Care Plan
+add_interventions_to_care_plan_flow:
+  description: >
+    Allows care managers to add specific interventions to the care plan based on the patient’s condition or progress.
+  steps:
+    - collect: care_plan_id
+    - collect: intervention_description
+    - collect: intervention_date
+    - action: action_add_intervention_to_care_plan
+    - if: "slots.intervention_status == 'added'"
+      then:
+        - action: utter_intervention_added
+      else:
+        - action: utter_intervention_addition_failed
+    - next: END
+
+# Flow for Adjusting Care Plan Based on Patient Feedback
+adjust_care_plan_feedback_flow:
+  description: >
+    Adjusts the care plan based on patient feedback or changes in the patient's condition.
+  steps:
+    - collect: care_plan_id
+    - collect: patient_feedback
+    - action: action_adjust_care_plan
+    - if: "slots.adjustment_status == 'completed'"
+      then:
+        - action: utter_care_plan_adjusted
+      else:
+        - action: utter_adjustment_failed
+    - next: END
+
